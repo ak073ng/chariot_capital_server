@@ -17,7 +17,6 @@ public class User {
     private String userName;
     private String email;
     private String password;
-    private String httpMessage;
     @CreationTimestamp
     private LocalDateTime createdDateTime;
     @UpdateTimestamp
@@ -69,14 +68,6 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getHttpMessage() {
-        return httpMessage;
-    }
-
-    public void setHttpMessage(String httpMessage) {
-        this.httpMessage = httpMessage;
     }
 
     public LocalDateTime getCreatedDateTime() {
