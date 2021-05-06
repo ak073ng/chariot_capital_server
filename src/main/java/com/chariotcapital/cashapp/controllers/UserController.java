@@ -26,53 +26,112 @@ public class UserController {
             new_user.setUserName(user.getUserName());
             new_user.setEmail(user.getEmail());
             new_user.setPassword(Constants.getSecurePassword(user.getPassword(), Constants.APP_SALT.getBytes()));
+            new_user.setSessionStatus(HttpStatus.OK.toString());
 
             userRepository.save(new_user);
-        } else{
-            new_user.setUserToken("null");
-            new_user.setFullName("null");
-            new_user.setUserName("null");
-            new_user.setEmail("null");
-            new_user.setPassword("null");
+
+            new_user.setPassword("<restricted>");
+
+            return new_user;
         }
+
+        new_user.setUserToken(null);
+        new_user.setFullName(null);
+        new_user.setUserName(null);
+        new_user.setEmail(null);
+        new_user.setPassword("<restricted>");
+        new_user.setSessionStatus(HttpStatus.NOT_ACCEPTABLE.toString());
 
         return new_user;
     }
 
     //login for existing users
     @PostMapping(path="/login")
-    public ResponseEntity<HttpStatus> loginUser (@RequestBody User user) {
-        User db_user = userRepository.findByEmail(user.getEmail());
+    public User loginUser (@RequestBody User user) {
+        User auth_user = userRepository.findByEmail(user.getEmail());
 
-        if(db_user == null){
-            return ResponseEntity.ok(HttpStatus.NOT_FOUND);
-        } else{
-            String user_pw = Constants.getSecurePassword(user.getPassword(), Constants.APP_SALT.getBytes());
+        if(auth_user == null){
+            User no_user = new User();
+            no_user.setUserToken(null);
+            no_user.setFullName(null);
+            no_user.setUserName(null);
+            no_user.setEmail(null);
+            no_user.setPassword("<restricted>");
+            no_user.setSessionStatus(HttpStatus.NOT_FOUND.toString());
 
-            if(user_pw.contentEquals(db_user.getPassword())){
-                return ResponseEntity.ok(HttpStatus.OK);
-            } else{
-                return ResponseEntity.ok(HttpStatus.UNAUTHORIZED);
-            }
+            return no_user;
         }
+
+        String user_pw = Constants.getSecurePassword(user.getPassword(), Constants.APP_SALT.getBytes());
+
+        if(user_pw.contentEquals(auth_user.getPassword())){
+            auth_user.setSessionStatus(HttpStatus.OK.toString());
+            auth_user.setPassword("<restricted>");
+
+            return auth_user;
+        }
+
+        auth_user.setSessionStatus(HttpStatus.UNAUTHORIZED.toString());
+        auth_user.setPassword("<restricted>");
+
+        return auth_user;
     }
 
     //change password for forgetful users
-    @PutMapping(path="/change_pw")
-    public ResponseEntity<HttpStatus> changeUserPw (@RequestBody User user){
-        User db_user = userRepository.findByEmail(user.getEmail());
+    @PatchMapping(path="/update_profile")
+    public User updateProfile (@RequestBody User user){
+        User auth_user = userRepository.findByEmail(user.getEmail());
 
-        if(db_user == null){
-            return ResponseEntity.ok(HttpStatus.NOT_FOUND);
-        } else{
-            String encrypted_pw = Constants.getSecurePassword(user.getPassword(), Constants.APP_SALT.getBytes());
+        if(auth_user == null){
+            User no_user = new User();
+            no_user.setUserToken(null);
+            no_user.setFullName(null);
+            no_user.setUserName(null);
+            no_user.setEmail(null);
+            no_user.setPassword("<restricted>");
+            no_user.setSessionStatus(HttpStatus.NOT_FOUND.toString());
 
-            db_user.setPassword(encrypted_pw);
-
-            userRepository.save(db_user);
-
-            return ResponseEntity.ok(HttpStatus.OK);
+            return no_user;
         }
+
+        auth_user.setFullName(user.getFullName());
+        auth_user.setUserName(user.getUserName());
+        auth_user.setSessionStatus(HttpStatus.OK.toString());
+
+        userRepository.save(auth_user);
+
+        auth_user.setPassword("<restricted>");
+
+        return auth_user;
+    }
+
+    //change password for forgetful users
+    @PatchMapping(path="/change_pw")
+    public User changeUserPw (@RequestBody User user){
+        User auth_user = userRepository.findByEmail(user.getEmail());
+
+        if(auth_user == null){
+            User no_user = new User();
+            no_user.setUserToken(null);
+            no_user.setFullName(null);
+            no_user.setUserName(null);
+            no_user.setEmail(null);
+            no_user.setPassword("<restricted>");
+            no_user.setSessionStatus(HttpStatus.NOT_FOUND.toString());
+
+            return no_user;
+        }
+
+        String encrypted_pw = Constants.getSecurePassword(user.getPassword(), Constants.APP_SALT.getBytes());
+
+        auth_user.setPassword(encrypted_pw);
+        auth_user.setSessionStatus(HttpStatus.OK.toString());
+
+        userRepository.save(auth_user);
+
+        auth_user.setPassword("<restricted>");
+
+        return auth_user;
     }
 
     //get all accounts

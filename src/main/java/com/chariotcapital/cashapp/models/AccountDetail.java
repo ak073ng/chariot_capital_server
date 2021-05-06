@@ -1,5 +1,6 @@
 package com.chariotcapital.cashapp.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,15 +12,30 @@ import java.time.LocalDateTime;
 public class AccountDetail {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
+    @JsonProperty("id")
     private Integer id;
+
+    @JsonProperty("userToken")
     private String userToken;
+
+    @JsonProperty("accountNumber")
     private String accountNumber;
+
+    @JsonProperty("debit")
     private double debit;
+
+    @JsonProperty("credit")
     private double credit;
+
+    @JsonProperty("accountBalance")
     private double accountBalance;
+
     @CreationTimestamp
+    @JsonProperty("createdDateTime")
     private LocalDateTime createdDateTime;
+
     @UpdateTimestamp
+    @JsonProperty("updatedDateTime")
     private LocalDateTime updatedDateTime;
 
     public Integer getId() {

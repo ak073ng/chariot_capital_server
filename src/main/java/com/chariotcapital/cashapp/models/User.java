@@ -1,5 +1,6 @@
 package com.chariotcapital.cashapp.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,15 +12,33 @@ import java.time.LocalDateTime;
 public class User {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
+    @JsonProperty("id")
     private Integer id;
+
+    @JsonProperty("userToken")
     private String userToken;
+
+    @JsonProperty("fullName")
     private String fullName;
+
+    @JsonProperty("userName")
     private String userName;
+
+    @JsonProperty("email")
     private String email;
+
+    @JsonProperty("password")
     private String password;
+
+    @JsonProperty("sessionStatus")
+    private String sessionStatus;
+
     @CreationTimestamp
+    @JsonProperty("createdDateTime")
     private LocalDateTime createdDateTime;
+
     @UpdateTimestamp
+    @JsonProperty("updatedDateTime")
     private LocalDateTime updatedDateTime;
 
     public Integer getId() {
@@ -68,6 +87,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getSessionStatus() {
+        return sessionStatus;
+    }
+
+    public void setSessionStatus(String SessionStatus) {
+        this.sessionStatus = sessionStatus;
     }
 
     public LocalDateTime getCreatedDateTime() {
