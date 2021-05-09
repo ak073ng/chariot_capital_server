@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -173,8 +174,11 @@ public class UserController {
 
     //get all accounts
     @GetMapping(path="/all")
-    public @ResponseBody Iterable<User> getAllUsers() {
-        // This returns a JSON or XML with the users
-        return userRepository.findAll();
+    public @ResponseBody Map<String, Iterable<User>> getAllUsers() {
+        Map<String, Iterable<User>> map = new HashMap<>();
+
+        map.put("users", userRepository.findAll());
+
+        return map;
     }
 }
