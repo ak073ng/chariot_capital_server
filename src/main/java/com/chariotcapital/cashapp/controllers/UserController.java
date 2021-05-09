@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping(path="/api/users")
 public class UserController {
@@ -17,7 +20,11 @@ public class UserController {
 
     //user registration for new users
     @PostMapping(path="/register")
-    public User registerUser (@RequestBody User user) {
+    public Map<String, User> registerUser (@RequestBody Map<String, User> map_request) {
+        Map<String, User> map = new HashMap<>();
+
+        User user = map_request.get("user");
+
         User new_user = new User();
 
         if(userRepository.findByEmail(user.getEmail()) == null){
@@ -32,7 +39,9 @@ public class UserController {
 
             new_user.setPassword("<restricted>");
 
-            return new_user;
+            map.put("user", new_user);
+
+            return map;
         }
 
         new_user.setUserToken(null);
@@ -42,12 +51,18 @@ public class UserController {
         new_user.setPassword("<restricted>");
         new_user.setSessionStatus(HttpStatus.NOT_ACCEPTABLE.toString());
 
-        return new_user;
+        map.put("user", new_user);
+
+        return map;
     }
 
     //login for existing users
     @PostMapping(path="/login")
-    public User loginUser (@RequestBody User user) {
+    public Map<String, User> loginUser (@RequestBody Map<String, User> map_request) {
+        Map<String, User> map = new HashMap<>();
+
+        User user = map_request.get("user");
+
         User auth_user = userRepository.findByEmail(user.getEmail());
 
         if(auth_user == null){
@@ -59,7 +74,9 @@ public class UserController {
             no_user.setPassword("<restricted>");
             no_user.setSessionStatus(HttpStatus.NOT_FOUND.toString());
 
-            return no_user;
+            map.put("user", no_user);
+
+            return map;
         }
 
         String user_pw = Constants.getSecurePassword(user.getPassword(), Constants.APP_SALT.getBytes());
@@ -68,18 +85,26 @@ public class UserController {
             auth_user.setSessionStatus(HttpStatus.OK.toString());
             auth_user.setPassword("<restricted>");
 
-            return auth_user;
+            map.put("user", auth_user);
+
+            return map;
         }
 
         auth_user.setSessionStatus(HttpStatus.UNAUTHORIZED.toString());
         auth_user.setPassword("<restricted>");
 
-        return auth_user;
+        map.put("user", auth_user);
+
+        return map;
     }
 
     //change password for forgetful users
     @PatchMapping(path="/update_profile")
-    public User updateProfile (@RequestBody User user){
+    public Map<String, User> updateProfile (@RequestBody Map<String, User> map_request){
+        Map<String, User> map = new HashMap<>();
+
+        User user = map_request.get("user");
+
         User auth_user = userRepository.findByEmail(user.getEmail());
 
         if(auth_user == null){
@@ -91,7 +116,9 @@ public class UserController {
             no_user.setPassword("<restricted>");
             no_user.setSessionStatus(HttpStatus.NOT_FOUND.toString());
 
-            return no_user;
+            map.put("user", no_user);
+
+            return map;
         }
 
         auth_user.setFullName(user.getFullName());
@@ -102,12 +129,18 @@ public class UserController {
 
         auth_user.setPassword("<restricted>");
 
-        return auth_user;
+        map.put("user", auth_user);
+
+        return map;
     }
 
     //change password for forgetful users
     @PatchMapping(path="/change_pw")
-    public User changeUserPw (@RequestBody User user){
+    public Map<String, User> changeUserPw (@RequestBody Map<String, User> map_request){
+        Map<String, User> map = new HashMap<>();
+
+        User user = map_request.get("user");
+
         User auth_user = userRepository.findByEmail(user.getEmail());
 
         if(auth_user == null){
@@ -119,7 +152,9 @@ public class UserController {
             no_user.setPassword("<restricted>");
             no_user.setSessionStatus(HttpStatus.NOT_FOUND.toString());
 
-            return no_user;
+            map.put("user", no_user);
+
+            return map;
         }
 
         String encrypted_pw = Constants.getSecurePassword(user.getPassword(), Constants.APP_SALT.getBytes());
@@ -131,7 +166,9 @@ public class UserController {
 
         auth_user.setPassword("<restricted>");
 
-        return auth_user;
+        map.put("user", auth_user);
+
+        return map;
     }
 
     //get all accounts

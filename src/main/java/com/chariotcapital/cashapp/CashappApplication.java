@@ -14,7 +14,7 @@ public class CashappApplication {
 	@RequestMapping("/")
 	@ResponseBody
 	String home() {
-		return "Chariot Capital server is running! - test 2";
+		return "Chariot Capital server is running! - test 4";
 	}
 
 	public static void main(String[] args) {
