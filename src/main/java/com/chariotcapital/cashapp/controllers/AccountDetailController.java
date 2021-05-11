@@ -1,10 +1,8 @@
 package com.chariotcapital.cashapp.controllers;
 
 import com.chariotcapital.cashapp.models.AccountDetail;
-import com.chariotcapital.cashapp.models.User;
 import com.chariotcapital.cashapp.repositories.AccountDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -81,26 +79,27 @@ public class AccountDetailController {
 
         AccountDetail acc_detail = map_request.get("account");
 
-        AccountDetail does_user_exist = acc_detailRepository.findByUserToken(acc_detail.getUserToken());
+        AccountDetail db_user = acc_detailRepository.findByUserToken(acc_detail.getUserToken());
 
-        AccountDetail user_acc_detail = new AccountDetail();
+        if(db_user != null){
+            db_user.setDebit(acc_detail.getDebit());
+            db_user.setCredit(acc_detail.getCredit());
+            db_user.setAccountBalance(acc_detail.getDebit() - acc_detail.getCredit());
 
-        if(does_user_exist != null){
-            user_acc_detail.setUserToken(acc_detail.getUserToken());
-            user_acc_detail.setDebit(acc_detail.getDebit());
-            user_acc_detail.setCredit(acc_detail.getCredit());
-            user_acc_detail.setAccountBalance(acc_detail.getDebit() - acc_detail.getCredit());
+            acc_detailRepository.save(db_user);
 
-            acc_detailRepository.save(user_acc_detail);
-
-            map.put("account", user_acc_detail);
+            map.put("account", db_user);
 
             return map;
         }
 
+        AccountDetail user_acc_detail = new AccountDetail();
+        user_acc_detail.setUserToken(null);
         user_acc_detail.setDebit(0);
         user_acc_detail.setCredit(0);
         user_acc_detail.setAccountBalance(0);
+        user_acc_detail.setCreatedDateTime(null);
+        user_acc_detail.setUpdatedDateTime(null);
 
         map.put("account", user_acc_detail);
 
