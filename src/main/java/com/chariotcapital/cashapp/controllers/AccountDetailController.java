@@ -86,6 +86,7 @@ public class AccountDetailController {
         AccountDetail user_acc_detail = new AccountDetail();
 
         if(does_user_exist != null){
+            user_acc_detail.setUserToken(acc_detail.getUserToken());
             user_acc_detail.setDebit(acc_detail.getDebit());
             user_acc_detail.setCredit(acc_detail.getCredit());
             user_acc_detail.setAccountBalance(acc_detail.getDebit() - acc_detail.getCredit());
