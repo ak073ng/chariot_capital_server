@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path="/api/acc_details")
+@RequestMapping(path="/api/accounts")
 public class AccountDetailController {
     @Autowired
     private AccountDetailRepository acc_detailRepository;
@@ -38,6 +38,9 @@ public class AccountDetailController {
 
         user_acc_detail.setUserToken(null);
         user_acc_detail.setAccountNumber(null);
+        user_acc_detail.setAccountBalance(0);
+        user_acc_detail.setDebit(0);
+        user_acc_detail.setDebit(0);
 
         map.put("account", user_acc_detail);
 
@@ -51,20 +54,19 @@ public class AccountDetailController {
 
         AccountDetail acc_detail = map_request.get("account");
 
-        AccountDetail does_user_exist = acc_detailRepository.findByUserToken(acc_detail.getUserToken());
+        AccountDetail user_exist = acc_detailRepository.findByUserToken(acc_detail.getUserToken());
 
-        AccountDetail user_acc_detail = new AccountDetail();
+        if(user_exist != null){
+            user_exist.setAccountNumber(acc_detail.getAccountNumber());
 
-        if(does_user_exist != null){
-            user_acc_detail.setAccountNumber(acc_detail.getAccountNumber());
+            acc_detailRepository.save(user_exist);
 
-            acc_detailRepository.save(user_acc_detail);
-
-            map.put("account", user_acc_detail);
+            map.put("account", user_exist);
 
             return map;
         }
 
+        AccountDetail user_acc_detail = new AccountDetail();
         user_acc_detail.setAccountNumber(null);
 
         map.put("account", user_acc_detail);
@@ -102,6 +104,16 @@ public class AccountDetailController {
         user_acc_detail.setUpdatedDateTime(null);
 
         map.put("account", user_acc_detail);
+
+        return map;
+    }
+
+    //get only user account
+    @GetMapping(path="/account/{user_token}")
+    public @ResponseBody Map<String, AccountDetail> getUserAccount(@PathVariable("user_token") String userToken) {
+        Map<String, AccountDetail> map = new HashMap<>();
+
+        map.put("account", acc_detailRepository.findByUserToken(userToken));
 
         return map;
     }

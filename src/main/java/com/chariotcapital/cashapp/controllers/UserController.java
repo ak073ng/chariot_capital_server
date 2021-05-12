@@ -60,10 +60,13 @@ public class UserController {
     //login for existing users
     @PostMapping(path="/login")
     public Map<String, User> loginUser (@RequestBody Map<String, User> map_request) {
+        //response back to client
         Map<String, User> map = new HashMap<>();
 
+        //request from client
         User user = map_request.get("user");
 
+        //builds response
         User auth_user = userRepository.findByEmail(user.getEmail());
 
         if(auth_user == null){
