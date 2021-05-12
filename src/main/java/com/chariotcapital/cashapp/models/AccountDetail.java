@@ -8,17 +8,20 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "account_details")
+@Table(name = "accounts")
 public class AccountDetail {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     @JsonProperty("id")
+    @Column(length = 11)
     private Integer id;
 
     @JsonProperty("userToken")
+    @Column(length = 8)
     private String userToken;
 
     @JsonProperty("accountNumber")
+    @Column(length = 25)
     private String accountNumber;
 
     @JsonProperty("debit")

@@ -6,11 +6,9 @@ import com.chariotcapital.cashapp.utility.Constants;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -34,6 +32,7 @@ public class UserController {
             new_user.setUserName(user.getUserName());
             new_user.setEmail(user.getEmail());
             new_user.setPassword(Constants.getSecurePassword(user.getPassword(), Constants.APP_SALT.getBytes()));
+            new_user.setNewPassword("<restricted>");
             new_user.setSessionStatus(HttpStatus.OK.toString());
 
             userRepository.save(new_user);
@@ -50,6 +49,7 @@ public class UserController {
         new_user.setUserName(null);
         new_user.setEmail(null);
         new_user.setPassword("<restricted>");
+        new_user.setNewPassword("<restricted>");
         new_user.setSessionStatus(HttpStatus.NOT_ACCEPTABLE.toString());
 
         map.put("user", new_user);
@@ -66,17 +66,22 @@ public class UserController {
         //request from client
         User user = map_request.get("user");
 
-        //builds response
+        //check for user in db
         User auth_user = userRepository.findByEmail(user.getEmail());
 
+        //no user
+        User no_user = new User();
+
         if(auth_user == null){
-            User no_user = new User();
             no_user.setUserToken(null);
             no_user.setFullName(null);
             no_user.setUserName(null);
             no_user.setEmail(null);
             no_user.setPassword("<restricted>");
+            no_user.setNewPassword("<restricted>");
             no_user.setSessionStatus(HttpStatus.NOT_FOUND.toString());
+            no_user.setCreatedDateTime(null);
+            no_user.setUpdatedDateTime(null);
 
             map.put("user", no_user);
 
@@ -88,16 +93,25 @@ public class UserController {
         if(user_pw.contentEquals(auth_user.getPassword())){
             auth_user.setSessionStatus(HttpStatus.OK.toString());
             auth_user.setPassword("<restricted>");
+            auth_user.setNewPassword("<restricted>");
 
             map.put("user", auth_user);
 
             return map;
         }
 
-        auth_user.setSessionStatus(HttpStatus.UNAUTHORIZED.toString());
-        auth_user.setPassword("<restricted>");
+        //if password does not match, returns the following
+        no_user.setUserToken(null);
+        no_user.setFullName(null);
+        no_user.setUserName(null);
+        no_user.setEmail(null);
+        no_user.setSessionStatus(HttpStatus.UNAUTHORIZED.toString());
+        no_user.setPassword("<restricted>");
+        no_user.setNewPassword("<restricted>");
+        no_user.setCreatedDateTime(null);
+        no_user.setUpdatedDateTime(null);
 
-        map.put("user", auth_user);
+        map.put("user", no_user);
 
         return map;
     }
@@ -118,6 +132,7 @@ public class UserController {
             no_user.setUserName(null);
             no_user.setEmail(null);
             no_user.setPassword("<restricted>");
+            no_user.setNewPassword("<restricted>");
             no_user.setSessionStatus(HttpStatus.NOT_FOUND.toString());
 
             map.put("user", no_user);
@@ -132,6 +147,7 @@ public class UserController {
         userRepository.save(auth_user);
 
         auth_user.setPassword("<restricted>");
+        auth_user.setNewPassword("<restricted>");
 
         map.put("user", auth_user);
 
@@ -147,13 +163,16 @@ public class UserController {
 
         User auth_user = userRepository.findByEmail(user.getEmail());
 
+        //for if no user exist by that email
+        User no_user = new User();
+
         if(auth_user == null){
-            User no_user = new User();
             no_user.setUserToken(null);
             no_user.setFullName(null);
             no_user.setUserName(null);
             no_user.setEmail(null);
             no_user.setPassword("<restricted>");
+            no_user.setNewPassword("<restricted>");
             no_user.setSessionStatus(HttpStatus.NOT_FOUND.toString());
 
             map.put("user", no_user);
@@ -161,16 +180,32 @@ public class UserController {
             return map;
         }
 
-        String encrypted_pw = Constants.getSecurePassword(user.getPassword(), Constants.APP_SALT.getBytes());
+        String current_encrypted_pw = Constants.getSecurePassword(user.getPassword(), Constants.APP_SALT.getBytes());
+        String new_encrypted_pw = Constants.getSecurePassword(user.getNewPassword(), Constants.APP_SALT.getBytes());
 
-        auth_user.setPassword(encrypted_pw);
-        auth_user.setSessionStatus(HttpStatus.OK.toString());
+        if(current_encrypted_pw.contentEquals(auth_user.getPassword())){
+            auth_user.setPassword(new_encrypted_pw);
+            auth_user.setSessionStatus(HttpStatus.OK.toString());
 
-        userRepository.save(auth_user);
+            userRepository.save(auth_user);
 
-        auth_user.setPassword("<restricted>");
+            auth_user.setPassword("<restricted>");
+            auth_user.setNewPassword("<restricted>");
 
-        map.put("user", auth_user);
+            map.put("user", auth_user);
+
+            return map;
+        }
+
+        no_user.setUserToken(null);
+        no_user.setFullName(null);
+        no_user.setUserName(null);
+        no_user.setEmail(null);
+        no_user.setPassword("<restricted>");
+        no_user.setNewPassword("<restricted>");
+        no_user.setSessionStatus(HttpStatus.UNAUTHORIZED.toString());
+
+        map.put("user", no_user);
 
         return map;
     }

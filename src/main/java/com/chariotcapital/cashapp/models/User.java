@@ -13,24 +13,35 @@ public class User {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     @JsonProperty("id")
+    @Column(length = 11)
     private Integer id;
 
     @JsonProperty("userToken")
+    @Column(length = 8)
     private String userToken;
 
     @JsonProperty("fullName")
+    @Column(length = 25)
     private String fullName;
 
     @JsonProperty("userName")
+    @Column(length = 15)
     private String userName;
 
     @JsonProperty("email")
+    @Column(length = 25)
     private String email;
 
     @JsonProperty("password")
+    @Column(length = 75)
     private String password;
 
+    @JsonProperty("newPassword")
+    @Transient
+    private String newPassword;
+
     @JsonProperty("sessionStatus")
+    @Column(length = 25)
     private String sessionStatus;
 
     @CreationTimestamp
@@ -87,6 +98,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
     }
 
     public String getSessionStatus() {
