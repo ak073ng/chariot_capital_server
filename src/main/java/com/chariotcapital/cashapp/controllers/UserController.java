@@ -1,6 +1,8 @@
 package com.chariotcapital.cashapp.controllers;
 
+import com.chariotcapital.cashapp.models.AccountDetail;
 import com.chariotcapital.cashapp.models.User;
+import com.chariotcapital.cashapp.repositories.AccountDetailRepository;
 import com.chariotcapital.cashapp.repositories.UserRepository;
 import com.chariotcapital.cashapp.utility.Constants;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -14,8 +16,12 @@ import java.util.Map;
 @RestController
 @RequestMapping(path="/api/users")
 public class UserController {
+
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AccountDetailRepository acc_detailRepository;
 
     //user registration for new users
     @PostMapping(path="/register")
@@ -116,9 +122,9 @@ public class UserController {
         return map;
     }
 
-    //change password for forgetful users
-    @PatchMapping(path="/update_profile")
-    public Map<String, User> updateProfile (@RequestBody Map<String, User> map_request){
+    //update user full name
+    @PatchMapping(path="/update_fullname")
+    public Map<String, User> updateFullName (@RequestBody Map<String, User> map_request){
         Map<String, User> map = new HashMap<>();
 
         User user = map_request.get("user");
@@ -141,6 +147,42 @@ public class UserController {
         }
 
         auth_user.setFullName(user.getFullName());
+        auth_user.setSessionStatus(HttpStatus.OK.toString());
+
+        userRepository.save(auth_user);
+
+        auth_user.setPassword("<restricted>");
+        auth_user.setNewPassword("<restricted>");
+
+        map.put("user", auth_user);
+
+        return map;
+    }
+
+    //update user username
+    @PatchMapping(path="/update_username")
+    public Map<String, User> updateUserName (@RequestBody Map<String, User> map_request){
+        Map<String, User> map = new HashMap<>();
+
+        User user = map_request.get("user");
+
+        User auth_user = userRepository.findByEmail(user.getEmail());
+
+        if(auth_user == null){
+            User no_user = new User();
+            no_user.setUserToken(null);
+            no_user.setFullName(null);
+            no_user.setUserName(null);
+            no_user.setEmail(null);
+            no_user.setPassword("<restricted>");
+            no_user.setNewPassword("<restricted>");
+            no_user.setSessionStatus(HttpStatus.NOT_FOUND.toString());
+
+            map.put("user", no_user);
+
+            return map;
+        }
+
         auth_user.setUserName(user.getUserName());
         auth_user.setSessionStatus(HttpStatus.OK.toString());
 
@@ -210,7 +252,33 @@ public class UserController {
         return map;
     }
 
-    //get all accounts
+    //get user
+    @GetMapping(path="/user/{user_token}")
+    public @ResponseBody Map<String, User> getUserAccount(@PathVariable("user_token") String userToken) {
+        Map<String, User> map = new HashMap<>();
+        map.put("account", userRepository.findByUserToken(userToken));
+
+        return map;
+    }
+
+    //delete user
+    @DeleteMapping(path="/user/delete/{user_token}")
+    public @ResponseBody Map<String, String> deleteUser(@PathVariable("user_token") String userToken) {
+        User user = userRepository.findByUserToken(userToken);
+
+        AccountDetail accountDetail = acc_detailRepository.findByUserToken(userToken);
+
+        acc_detailRepository.delete(accountDetail);
+        userRepository.delete(user);
+
+        Map<String, String> map = new HashMap<>();
+        map.put("user", null);
+        map.put("message", "User, " + userToken + ", is successfully deleted");
+
+        return map;
+    }
+
+    //get all users
     @GetMapping(path="/all")
     public @ResponseBody Map<String, Iterable<User>> getAllUsers() {
         Map<String, Iterable<User>> map = new HashMap<>();
