@@ -4,7 +4,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
@@ -26,7 +25,7 @@ public class CashappApplication {
 	@GetMapping(value = "/privacy-policy")
 	public StreamingResponseBody getStreamingFile(HttpServletResponse response) throws URISyntaxException {
 
-		File file = new File(getClass().getClassLoader().getResource("templates/cc-privacy-policy.pdf").toURI());
+		File file = new File(getClass().getClassLoader().getResource("templates/cc-privacy-policy.pdf").toExternalForm());
 
 		//viewing in web browser
 		response.setContentType("application/pdf");
